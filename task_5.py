@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 class Node:
     '''Node'''
-    def __init__(self, key, color="skyblue"):
+    def __init__(self, key, color="#1296F0"):
         self.left = None
         self.right = None
         self.val = key
@@ -41,37 +41,56 @@ def draw_tree(tree_root):
     nx.draw(tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=colors)
     plt.show()
 
-def heapify(tree_root):
-    '''Функція для візуалізації бінарної купи'''
-    tree = nx.DiGraph()
-    pos = {tree_root.id: (0, 0)}
-    tree = add_edges(tree, tree_root, pos)
 
-    colors = [node[1]['color'] for node in tree.nodes(data=True)]
-    labels = {node[0]: node[1]['label'] for node in tree.nodes(data=True)}
+def increment_color(color):
+    '''Логіка для зміни кольору'''
+    r = min(int(color[1:3], 16) + 16, 255)
+    g = min(int(color[3:5], 16) + 16, 255)
+    b = min(int(color[5:7], 16) + 16, 255)
+    return '#{:02x}{:02x}{:02x}'.format(r, g, b)
 
-    plt.figure(figsize=(8, 5))
-    nx.draw(tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=colors)
-    plt.show()
+def bfs(node):
+    '''Обхід бінарного дерева в ширину'''
+    visited = []
+    queue = [node]
+    new_color=node.color
+    while queue:
+        current = queue.pop(0)
+        if current:
+            new_color = increment_color(new_color)
+            current.color=new_color
+            visited.append(current)
+            queue.append(current.left)
+            queue.append(current.right)
+    return visited
 
-if __name__ == "__main__":
-    # Створення дерева
-    root = Node(0)
-    root.left = Node(4)
-    root.left.left = Node(5)
-    root.left.right = Node(10)
-    root.right = Node(1)
-    root.right.left = Node(3)
+stored_color = "#1296F0"
 
-    draw_tree(root)
+def dfs(node, visited=[]):
+    '''Обхід бінарного дерева в глибину'''
+    global stored_color
+    if node is not None:
+        stored_color = increment_color(stored_color)
+        node.color = stored_color
+        visited.append(node)
+        dfs(node.left, visited)
+        dfs(node.right, visited)
+    return visited
 
-    # Створення бінарної купи
-    heap_root = Node(5)
-    heap_root.left = Node(3)
-    heap_root.right = Node(8)
-    heap_root.left.left = Node(2)
-    heap_root.left.right = Node(4)
-    heap_root.right.left = Node(7)
-    heap_root.right.right = Node(10)
 
-    heapify(heap_root)
+# Створення дерева
+root = Node(5)
+root.left = Node(3)
+root.right = Node(8)
+root.left.left = Node(2)
+root.left.right = Node(4)
+root.right.left = Node(7)
+root.right.right = Node(10)
+
+# Візуалізація обходу бінарного дерева в ширину
+bfs(root)
+draw_tree(root)
+
+# Візуалізація обходу бінарного дерева в глибину
+dfs(root)
+draw_tree(root)
